@@ -1,53 +1,104 @@
-# Modelia AI Studio - Simplified AI Image Generation App
+<div align="center">
 
-This project is a small React web application simulating a simplified AI studio experience. It allows users to upload images, provide text prompts, select visual styles, and generate styled images using a mocked AI generation API.
+# Modelia AI Studio
 
-## Project Purpose
+React + TypeScript + Vite + TailwindCSS
 
-The goal of this assignment is to demonstrate skills in modern front-end engineering, including:
+</div>
 
-- Building reactive UI with **React** and **TypeScript**.
-- Using **TailwindCSS** for styling and responsive layouts.
-- Handling image uploads, previews, and client-side resizing.
-- Implementing API interaction with error handling and retry logic.
-- Managing application state and localStorage for generation history.
-- Ensuring accessibility with keyboard navigation and ARIA attributes.
-- Writing clean, maintainable code with ESLint and Prettier.
-- Optionally adding unit and end-to-end tests following best practices.
+## Overview
 
-This project simulates core parts of an AI image generation studio, focusing on UI/UX quality, functional correctness, code structure, and performance optimizations.
+Modelia AI Studio is a (soon to be) simplified AI image generation interface. This repository currently contains the project scaffold with:
 
-## Features
+- Vite (React + TS) setup
+- TailwindCSS (manual config)
+- Strict TypeScript compiler options
+- ESLint (type-aware, strict + stylistic) integrated with Prettier
 
-- Upload PNG/JPG images up to 10MB with live preview.
-- Client-side downscaling for large images to improve performance.
-- Text input for prompts and style selection from dropdown.
-- Live summary displaying the selected image, prompt, and style.
-- "Generate" button calls a mocked API with simulated latency, success, and failure responses.
-- Retry mechanism on failures with exponential backoff and ability to abort requests.
-- Stores last 5 generated images with prompts and styles in localStorage.
-- History panel to restore previous generations.
-- Fully keyboard accessible with visible focus states and ARIA support.
+> The functional AI studio features described in the original draft will be implemented next.
 
 ## Tech Stack
 
-- React with TypeScript (strict mode enabled)
-- TailwindCSS for styling
-- ESLint and Prettier for code quality
-- Mocked API implementation for generation simulation
+| Layer      | Choice                                                 |
+| ---------- | ------------------------------------------------------ |
+| Build Tool | Vite 7                                                 |
+| UI Library | React 19 (RC APIs not used)                            |
+| Language   | TypeScript (strict)                                    |
+| Styling    | TailwindCSS                                            |
+| Linting    | ESLint (typescript-eslint, react hooks, react-refresh) |
+| Formatting | Prettier                                               |
 
-(Optional bonus features):
+## Scripts
 
-- Unit tests using React Testing Library
-- End-to-end tests with Cypress or Playwright
-- PWA features including offline caching and manifest
+| Command           | Purpose                       |
+| ----------------- | ----------------------------- |
+| `npm run dev`     | Start dev server (Vite)       |
+| `npm run build`   | Type check & production build |
+| `npm run preview` | Preview production build      |
+| `npm run lint`    | Run ESLint (type-aware)       |
+
+## Tailwind Setup
+
+Config files:
+
+- `tailwind.config.js` – content globs for `index.html` and all source files.
+- `postcss.config.js` – enables `tailwindcss` + `autoprefixer`.
+- `src/index.css` – includes `@tailwind` directives and minimal base layer customizations.
+
+### Adding a Component
+
+```tsx
+export function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600/15 px-3 py-1 text-sm font-medium text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+      {children}
+    </span>
+  )
+}
+```
+
+## Lint & Format
+
+- ESLint config (`eslint.config.js`) uses `recommendedTypeChecked`, `strictTypeChecked`, and `stylisticTypeChecked` presets.
+- `eslint-config-prettier` disables conflicting formatting rules.
+- Prettier config: `.prettierrc.json` (no semicolons, single quotes, width 90).
+
+Run manually:
+
+```bash
+npm run lint
+```
+
+Format (optional – we rely on editor integration):
+
+```bash
+npx prettier . --write
+```
+
+## TypeScript Strictness
+
+Key compiler flags: `strict`, `noUnusedLocals`, `noUnusedParameters`, `noUncheckedSideEffectImports`, `verbatimModuleSyntax`.
+
+## Next Steps (Planned Features)
+
+1. Image upload & validation (PNG/JPG ≤ 10MB)
+2. Client-side resizing worker
+3. Prompt + style selection UI
+4. Mocked generation API with latency + failure simulation & retry
+5. Abort controller integration
+6. LocalStorage history (last 5 generations)
+7. Accessible components (focus states, ARIA)
+8. Unit tests (React Testing Library) & optional E2E (Playwright)
 
 ## Getting Started
 
-### Prerequisites
+```bash
+npm install
+npm run dev
+```
 
-- Node.js (v16 or higher recommended)
-- npm or yarn package manager
+Open http://localhost:5173.
 
-### Installation
+## License
 
+MIT (add a LICENSE file if distributing publicly).
