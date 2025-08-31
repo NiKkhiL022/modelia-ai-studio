@@ -1,11 +1,10 @@
 import React from 'react'
 import { Wand2, StopCircle, RotateCcw, Sparkles } from 'lucide-react'
-import type { UploadedImage, StyleOption } from '../types'
+import type { UploadedImage } from '../types'
 
-interface GenerateButtonProps {
+type GenerateButtonProps = {
   uploadedImage: UploadedImage | null
   prompt: string
-  style: StyleOption
   isGenerating: boolean
   retryCount: number
   onGenerate: () => void
@@ -16,7 +15,6 @@ interface GenerateButtonProps {
 export const GenerateButton: React.FC<GenerateButtonProps> = ({
   uploadedImage,
   prompt,
-  style,
   isGenerating,
   retryCount,
   onGenerate,
