@@ -7,7 +7,7 @@ import {
   createImagePreview,
 } from '../utils/imageUtils'
 
-interface ImageUploadProps {
+type ImageUploadProps = {
   onImageUpload: (image: UploadedImage | null) => void
   uploadedImage: UploadedImage | null
 }
@@ -18,6 +18,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   const processFile = useCallback(
     async (file: File) => {
@@ -65,18 +66,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       e.preventDefault()
       e.stopPropagation()
       setDragActive(false)
-
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        processFile(e.dataTransfer.files[0])
-      }
+      const file = e.dataTransfer.files[0]
+      void processFile(file)
     },
     [processFile],
   )
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files[0]) {
-        processFile(e.target.files[0])
+      const file = e.target.files?.[0]
+      if (file) {
+        void processFile(file)
       }
     },
     [processFile],
@@ -93,10 +93,21 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     return (
       <div className="relative group">
         <div className="relative overflow-hidden rounded-2xl border-2 border-modelia-200 bg-gradient-to-br from-modelia-50 to-white shadow-lg">
+          {/* Skeleton placeholder */}
+          <div
+            className={`absolute inset-0 animate-pulse bg-gradient-to-br from-modelia-100 to-modelia-200 transition-opacity duration-300 ${loaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          />
           <img
             src={uploadedImage.preview}
             alt="Uploaded preview"
-            className="w-full h-80 object-cover"
+            className="w-full h-60 sm:h-72 md:h-80 object-cover transition-opacity duration-300"
+            loading="eager"
+            decoding="async"
+            width={640}
+            height={480}
+            onLoad={() => {
+              setLoaded(true)
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <button
@@ -120,7 +131,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div className="space-y-4">
       <div
-        className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+        className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-10 md:p-12 text-center transition-all duration-300 ${
           dragActive
             ? 'border-modelia-400 bg-modelia-50 scale-105'
             : 'border-modelia-200 hover:border-modelia-300 hover:bg-modelia-25'
@@ -144,16 +155,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         ) : (
           <>
             <div className="relative mb-6">
-              <div className="w-16 h-16 mx-auto bg-modelia-gradient rounded-2xl flex items-center justify-center shadow-lg animate-float">
-                <ImageIcon className="w-8 h-8 text-white" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto bg-modelia-gradient rounded-2xl flex items-center justify-center shadow-lg animate-float">
+                <ImageIcon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
               </div>
             </div>
             <div className="space-y-4">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                   Upload your fashion image
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                   Drop your image here or{' '}
                   <label
                     htmlFor="file-upload"
@@ -173,7 +184,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 disabled={isProcessing}
                 aria-describedby="file-upload-description"
               />
-              <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-500">
                 <span className="flex items-center">
                   <Upload className="w-4 h-4 mr-1" />
                   PNG or JPG
