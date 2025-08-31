@@ -188,7 +188,6 @@ function App() {
                   <GenerateButton
                     uploadedImage={uploadedImage}
                     prompt={prompt}
-                    style={style}
                     isGenerating={isGenerating}
                     retryCount={retryCount}
                     onGenerate={() => {

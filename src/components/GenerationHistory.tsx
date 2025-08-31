@@ -3,7 +3,7 @@ import { History, Clock, Trash2, Sparkles } from 'lucide-react'
 import type { Generation } from '../types'
 import { getGenerationHistory, clearGenerationHistory } from '../services/localStorage'
 
-interface GenerationHistoryProps {
+type GenerationHistoryProps = {
   onSelectGeneration: (generation: Generation) => void
   refreshTrigger: number
 }
@@ -73,10 +73,12 @@ export const GenerationHistory: React.FC<GenerationHistoryProps> = ({
       </div>
 
       <div className="space-y-4">
-        {history.map((generation, index) => (
+        {history.map(generation => (
           <button
             key={generation.id}
-            onClick={() => onSelectGeneration(generation)}
+            onClick={() => {
+              onSelectGeneration(generation)
+            }}
             className="w-full text-left bg-white/80 backdrop-blur-sm border border-modelia-200 rounded-2xl p-4 hover:border-modelia-300 hover:shadow-xl hover:bg-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-modelia-500 focus:ring-offset-2 group transform hover:-translate-y-1"
             aria-label={`Select generation: ${generation.prompt}`}
           >
