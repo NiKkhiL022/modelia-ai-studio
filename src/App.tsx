@@ -18,6 +18,7 @@ function App() {
   const [style, setStyle] = useState<StyleOption>('Editorial')
   const [latestResult, setLatestResult] = useState<Generation | null>(null)
   const [historyRefresh, setHistoryRefresh] = useState(0)
+  const [preserveInputs, setPreserveInputs] = useState(false)
 
   const { isGenerating, error, retryCount, generate, abort } = useGeneration()
 
@@ -34,6 +35,10 @@ function App() {
     if (result) {
       setLatestResult(result)
       setHistoryRefresh(prev => prev + 1)
+      if (!preserveInputs) {
+        setUploadedImage(null)
+        setPrompt('')
+      }
     }
   }
 
@@ -44,7 +49,7 @@ function App() {
   }
 
   const handleRetry = () => {
-    handleGenerate()
+    void handleGenerate()
   }
 
   const handleDismissError = () => {
@@ -55,21 +60,32 @@ function App() {
     <div className="min-h-screen gradient-bg">
       <Header />
 
-      <main className="relative">
+      <main className="relative" role="main">
+        {/* Live region for status updates (accessibility) */}
+        <div aria-live="polite" className="sr-only">
+          {isGenerating
+            ? 'Generating image'
+            : error
+              ? `Error: ${error}`
+              : latestResult
+                ? 'Generation complete'
+                : ''}
+        </div>
         {/* Hero Section */}
         <section className="relative overflow-hidden py-20">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="text-center mb-16">
               <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-modelia-200 rounded-full text-modelia-700 font-medium text-sm mb-6 shadow-lg">
                 <Sparkles className="w-4 h-4 mr-2" />
-                AI Fashion Model Generator
+                Modelia AI Studio
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Bring your products to <span className="modelia-gradient-text">life</span>
+                Create stunning AI-generated{' '}
+                <span className="modelia-gradient-text">images</span> with ease
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Revolutionize your fashion brand with AI models, dynamic visuals, and
-                effortless content creation.
+                Upload your photo, add a creative prompt, select a style, and instantly
+                generate unique AI-enhanced images.
               </p>
             </div>
 
@@ -77,11 +93,15 @@ function App() {
             <div className="flex flex-wrap justify-center gap-4 mb-16">
               <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-green-200 rounded-full text-green-700 font-medium text-sm shadow-lg">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Accelerate campaign launches with instant scene creation
+                Upload & preview images with easy client-side resizing
               </div>
               <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-200 rounded-full text-blue-700 font-medium text-sm shadow-lg">
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Scale your content across all marketing channels
+                Generate images with prompt and style selection via mocked AI API
+              </div>
+              <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-full text-purple-700 font-medium text-sm shadow-lg">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Manage generation history and retry on errors with abort support
               </div>
             </div>
           </div>
@@ -160,9 +180,29 @@ function App() {
                     style={style}
                     isGenerating={isGenerating}
                     retryCount={retryCount}
-                    onGenerate={handleGenerate}
+                    onGenerate={() => {
+                      void handleGenerate()
+                    }}
                     onAbort={abort}
                   />
+                  <div className="mt-6 flex items-center gap-2">
+                    <input
+                      id="preserve"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-modelia-500 focus:ring-modelia-500"
+                      checked={preserveInputs}
+                      onChange={e => {
+                        setPreserveInputs(e.target.checked)
+                      }}
+                      disabled={isGenerating}
+                    />
+                    <label
+                      htmlFor="preserve"
+                      className="text-sm text-gray-600 select-none"
+                    >
+                      Keep image & prompt after generation
+                    </label>
+                  </div>
                 </div>
 
                 {/* Generated Result */}
