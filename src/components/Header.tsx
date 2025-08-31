@@ -1,9 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sparkles, Menu, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export const Header: React.FC = () => {
   const [open, setOpen] = useState(false)
+
+  // Close mobile menu automatically if viewport becomes desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setOpen(false)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
   return (
     <header className="relative z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0">
       <div className="container mx-auto px-4 py-4">
@@ -31,7 +42,13 @@ export const Header: React.FC = () => {
               to="/architecture"
               className="text-gray-600 hover:text-modelia-600 font-medium focus:outline-none focus:ring-2 focus:ring-modelia-500 rounded-md px-2 py-1"
             >
-              Architecture
+              Project Architecture
+            </Link>
+            <Link
+              to="/about"
+              className="text-gray-600 hover:text-modelia-600 font-medium focus:outline-none focus:ring-2 focus:ring-modelia-500 rounded-md px-2 py-1"
+            >
+              About Project
             </Link>
             <a
               href="https://www.gattadinikhil.in/"
@@ -44,12 +61,13 @@ export const Header: React.FC = () => {
           </nav>
           <button
             onClick={() => {
-              setOpen(true)
+              setOpen(o => !o)
             }}
             className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-modelia-500 text-gray-600"
-            aria-label="Open menu"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
           >
-            <Menu className="w-6 h-6" />
+            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
@@ -92,6 +110,15 @@ export const Header: React.FC = () => {
                 className="text-gray-700 font-medium hover:text-modelia-600"
               >
                 Architecture
+              </Link>
+              <Link
+                to="/about"
+                onClick={() => {
+                  setOpen(false)
+                }}
+                className="text-gray-700 font-medium hover:text-modelia-600"
+              >
+                About Project
               </Link>
               <a
                 href="https://www.gattadinikhil.in/"

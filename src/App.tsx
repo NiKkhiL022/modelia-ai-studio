@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sparkles, ArrowRight, CheckCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle } from 'lucide-react'
 import type { UploadedImage, StyleOption, Generation } from './types'
 import { Header } from './components/Header'
 import { ImageUpload } from './components/ImageUpload'
@@ -11,7 +11,6 @@ import { GenerationHistory } from './components/GenerationHistory'
 import { GeneratedResult } from './components/GeneratedResult'
 import { ErrorDisplay } from './components/ErrorDisplay'
 import { useGeneration } from './hooks/useGeneration'
-import { useStreamingGeneration } from './hooks/useStreamingGeneration'
 
 function App() {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
@@ -22,34 +21,20 @@ function App() {
   const [preserveInputs, setPreserveInputs] = useState(false)
 
   const { isGenerating, error, retryCount, generate, abort } = useGeneration()
-  const {
-    progress: streamProgress,
-    imageUrl: streamImageUrl,
-    error: streamError,
-    isStreaming,
-    start: startStreaming,
-    abort: abortStreaming,
-  } = useStreamingGeneration()
-  const [useStreaming, setUseStreaming] = useState(true)
 
   const handleGenerate = async () => {
     if (!uploadedImage || !prompt.trim()) return
-    const request = {
+    const result = await generate({
       imageDataUrl: uploadedImage.dataUrl,
       prompt: prompt.trim(),
       style,
-    }
-    if (useStreaming) {
-      await startStreaming(request)
-    } else {
-      const result = await generate(request)
-      if (result) {
-        setLatestResult(result)
-        setHistoryRefresh(prev => prev + 1)
-        if (!preserveInputs) {
-          setUploadedImage(null)
-          setPrompt('')
-        }
+    })
+    if (result) {
+      setLatestResult(result)
+      setHistoryRefresh(prev => prev + 1)
+      if (!preserveInputs) {
+        setUploadedImage(null)
+        setPrompt('')
       }
     }
   }
@@ -65,33 +50,30 @@ function App() {
   }
 
   const handleDismissError = () => {
-    // Error will be cleared automatically when a new generation is attempted
+    // Abort resets internal error state in hook
+    abort()
   }
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
       <Header />
-
       <main className="relative" role="main">
         {/* Live region for status updates (accessibility) */}
         <div aria-live="polite" className="sr-only">
-          {isGenerating || isStreaming
+          {isGenerating
             ? 'Generating image'
-            : (error ?? streamError)
-              ? `Error: ${String(error ?? streamError)}`
+            : error
+              ? `Error: ${error}`
               : latestResult
                 ? 'Generation complete'
-                : ''}
+                : 'Idle'}
         </div>
+
         {/* Hero Section */}
-        <section className="relative overflow-hidden py-20">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-modelia-200 rounded-full text-modelia-700 font-medium text-sm mb-6 shadow-lg">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Modelia AI Studio
-              </div>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+        <section className="relative pt-16 pb-8">
+          <div className="container mx-auto px-4 relative z-10 text-center">
+            <div className="mb-12">
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-gray-900">
                 Create stunning AI-generated{' '}
                 <span className="modelia-gradient-text">images</span> with ease
               </h1>
@@ -175,43 +157,26 @@ function App() {
                       Generate AI Content
                     </h2>
                   </div>
-
-                  {(error ?? streamError) && (
+                  {error && (
                     <div className="mb-6">
                       <ErrorDisplay
-                        error={error ?? streamError ?? ''}
+                        error={error}
                         onRetry={handleRetry}
                         onDismiss={handleDismissError}
                       />
                     </div>
                   )}
-
                   <GenerateButton
                     uploadedImage={uploadedImage}
                     prompt={prompt}
                     style={style}
-                    isGenerating={isGenerating || isStreaming}
+                    isGenerating={isGenerating}
                     retryCount={retryCount}
                     onGenerate={() => {
                       void handleGenerate()
                     }}
-                    onAbort={useStreaming ? abortStreaming : abort}
+                    onAbort={abort}
                   />
-                  {useStreaming && (isStreaming || streamProgress > 0) && (
-                    <div className="mt-6 space-y-2" aria-label="Streaming progress">
-                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-modelia-gradient transition-all duration-300"
-                          style={{ width: `${String(streamProgress)}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 font-medium tracking-wide">
-                        {streamProgress < 100
-                          ? `Generating... ${String(Math.round(streamProgress))}%`
-                          : 'Finalizing result'}
-                      </p>
-                    </div>
-                  )}
                   <div className="mt-6 flex items-center gap-2">
                     <input
                       id="preserve"
@@ -221,7 +186,7 @@ function App() {
                       onChange={e => {
                         setPreserveInputs(e.target.checked)
                       }}
-                      disabled={isGenerating || isStreaming}
+                      disabled={isGenerating}
                     />
                     <label
                       htmlFor="preserve"
@@ -230,28 +195,9 @@ function App() {
                       Keep image & prompt after generation
                     </label>
                   </div>
-                  <div className="mt-4 flex items-center gap-2">
-                    <input
-                      id="streaming"
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-modelia-500 focus:ring-modelia-500"
-                      checked={useStreaming}
-                      onChange={e => {
-                        setUseStreaming(e.target.checked)
-                      }}
-                      disabled={isGenerating || isStreaming}
-                    />
-                    <label
-                      htmlFor="streaming"
-                      className="text-sm text-gray-600 select-none"
-                    >
-                      Use streaming mode
-                    </label>
-                  </div>
                 </div>
-
                 {/* Generated Result */}
-                {(latestResult ?? streamImageUrl) && (
+                {latestResult && (
                   <div className="modelia-card p-8">
                     <div className="flex items-center space-x-3 mb-6">
                       <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -261,22 +207,10 @@ function App() {
                         Your AI Generation
                       </h2>
                     </div>
-                    {streamImageUrl && useStreaming && !latestResult ? (
-                      <div className="modelia-card overflow-hidden">
-                        <img
-                          src={streamImageUrl}
-                          alt="Streaming result"
-                          className="w-full h-80 object-cover rounded-xl"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      latestResult && <GeneratedResult result={latestResult} />
-                    )}
+                    <GeneratedResult result={latestResult} />
                   </div>
                 )}
               </div>
-
               {/* Sidebar */}
               <div className="space-y-8">
                 {/* Live Preview */}
@@ -291,7 +225,6 @@ function App() {
                     style={style}
                   />
                 </div>
-
                 {/* History */}
                 <div>
                   <GenerationHistory
@@ -303,7 +236,6 @@ function App() {
             </div>
           </div>
         </section>
-
         {/* Background Decorations */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-32 h-32 bg-modelia-200 rounded-full opacity-20 animate-float"></div>
