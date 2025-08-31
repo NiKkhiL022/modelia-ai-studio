@@ -1,21 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS variables / base tweaks */
-:root {
-  --app-bg: theme('colors.zinc.950');
+@layer base {
+  body {
+    @apply bg-white text-gray-900 font-sans;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
+
+  :root {
+    /* Tailwind token (quote the path) */
+    --color-border: theme('colors.gray.200');
+  }
 }
 
-body {
-  @apply bg-zinc-950 text-zinc-100 antialiased min-h-screen;
+@layer components {
+  .modelia-gradient-text {
+    @apply bg-gradient-to-r from-gradient-from via-gradient-via to-gradient-to bg-clip-text text-transparent;
+  }
+
+  .modelia-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-modelia-500 to-modelia-600 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  .modelia-button:before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300;
+  }
+
+  .modelia-card {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300;
+  }
+
+  .modelia-input {
+    @apply w-full px-4 py-3 bg-white/90 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-modelia-500 focus:border-transparent transition-all duration-200 placeholder-gray-400;
+  }
+
+  .modelia-select {
+    @apply w-full px-4 py-3 bg-white/90 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-modelia-500 focus:border-transparent transition-all duration-200 appearance-none cursor-pointer;
+  }
 }
 
-a {
-  @apply text-indigo-400 hover:text-indigo-300 underline underline-offset-2;
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #faf7ff 0%,
+    #f3ecff 25%,
+    #e9dcff 50%,
+    #d6bfff 75%,
+    #bc94ff 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient 8s ease infinite;
 }
 
-button:focus-visible,
-a:focus-visible {
-  @apply outline-none ring-2 ring-indigo-400 ring-offset-2 ring-offset-zinc-950 rounded;
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
