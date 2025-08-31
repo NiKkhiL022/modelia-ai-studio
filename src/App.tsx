@@ -11,6 +11,7 @@ import { GenerationHistory } from './components/GenerationHistory'
 import { GeneratedResult } from './components/GeneratedResult'
 import { ErrorDisplay } from './components/ErrorDisplay'
 import { useGeneration } from './hooks/useGeneration'
+import { useStreamingGeneration } from './hooks/useStreamingGeneration'
 
 function App() {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null)
@@ -21,23 +22,34 @@ function App() {
   const [preserveInputs, setPreserveInputs] = useState(false)
 
   const { isGenerating, error, retryCount, generate, abort } = useGeneration()
+  const {
+    progress: streamProgress,
+    imageUrl: streamImageUrl,
+    error: streamError,
+    isStreaming,
+    start: startStreaming,
+    abort: abortStreaming,
+  } = useStreamingGeneration()
+  const [useStreaming, setUseStreaming] = useState(true)
 
   const handleGenerate = async () => {
     if (!uploadedImage || !prompt.trim()) return
-
     const request = {
       imageDataUrl: uploadedImage.dataUrl,
       prompt: prompt.trim(),
       style,
     }
-
-    const result = await generate(request)
-    if (result) {
-      setLatestResult(result)
-      setHistoryRefresh(prev => prev + 1)
-      if (!preserveInputs) {
-        setUploadedImage(null)
-        setPrompt('')
+    if (useStreaming) {
+      await startStreaming(request)
+    } else {
+      const result = await generate(request)
+      if (result) {
+        setLatestResult(result)
+        setHistoryRefresh(prev => prev + 1)
+        if (!preserveInputs) {
+          setUploadedImage(null)
+          setPrompt('')
+        }
       }
     }
   }
@@ -63,10 +75,10 @@ function App() {
       <main className="relative" role="main">
         {/* Live region for status updates (accessibility) */}
         <div aria-live="polite" className="sr-only">
-          {isGenerating
+          {isGenerating || isStreaming
             ? 'Generating image'
-            : error
-              ? `Error: ${error}`
+            : (error ?? streamError)
+              ? `Error: ${String(error ?? streamError)}`
               : latestResult
                 ? 'Generation complete'
                 : ''}
@@ -164,10 +176,10 @@ function App() {
                     </h2>
                   </div>
 
-                  {error && (
+                  {(error ?? streamError) && (
                     <div className="mb-6">
                       <ErrorDisplay
-                        error={error}
+                        error={error ?? streamError ?? ''}
                         onRetry={handleRetry}
                         onDismiss={handleDismissError}
                       />
@@ -178,13 +190,28 @@ function App() {
                     uploadedImage={uploadedImage}
                     prompt={prompt}
                     style={style}
-                    isGenerating={isGenerating}
+                    isGenerating={isGenerating || isStreaming}
                     retryCount={retryCount}
                     onGenerate={() => {
                       void handleGenerate()
                     }}
-                    onAbort={abort}
+                    onAbort={useStreaming ? abortStreaming : abort}
                   />
+                  {useStreaming && (isStreaming || streamProgress > 0) && (
+                    <div className="mt-6 space-y-2" aria-label="Streaming progress">
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-modelia-gradient transition-all duration-300"
+                          style={{ width: `${String(streamProgress)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 font-medium tracking-wide">
+                        {streamProgress < 100
+                          ? `Generating... ${String(Math.round(streamProgress))}%`
+                          : 'Finalizing result'}
+                      </p>
+                    </div>
+                  )}
                   <div className="mt-6 flex items-center gap-2">
                     <input
                       id="preserve"
@@ -194,7 +221,7 @@ function App() {
                       onChange={e => {
                         setPreserveInputs(e.target.checked)
                       }}
-                      disabled={isGenerating}
+                      disabled={isGenerating || isStreaming}
                     />
                     <label
                       htmlFor="preserve"
@@ -203,10 +230,28 @@ function App() {
                       Keep image & prompt after generation
                     </label>
                   </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <input
+                      id="streaming"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-modelia-500 focus:ring-modelia-500"
+                      checked={useStreaming}
+                      onChange={e => {
+                        setUseStreaming(e.target.checked)
+                      }}
+                      disabled={isGenerating || isStreaming}
+                    />
+                    <label
+                      htmlFor="streaming"
+                      className="text-sm text-gray-600 select-none"
+                    >
+                      Use streaming mode
+                    </label>
+                  </div>
                 </div>
 
                 {/* Generated Result */}
-                {latestResult && (
+                {(latestResult ?? streamImageUrl) && (
                   <div className="modelia-card p-8">
                     <div className="flex items-center space-x-3 mb-6">
                       <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
@@ -216,7 +261,18 @@ function App() {
                         Your AI Generation
                       </h2>
                     </div>
-                    <GeneratedResult result={latestResult} />
+                    {streamImageUrl && useStreaming && !latestResult ? (
+                      <div className="modelia-card overflow-hidden">
+                        <img
+                          src={streamImageUrl}
+                          alt="Streaming result"
+                          className="w-full h-80 object-cover rounded-xl"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : (
+                      latestResult && <GeneratedResult result={latestResult} />
+                    )}
                   </div>
                 )}
               </div>
