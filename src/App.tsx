@@ -70,39 +70,58 @@ function App() {
         </div>
 
         {/* Hero Section */}
-        <section className="relative pt-16 pb-8">
-          <div className="container mx-auto px-4 relative z-10 text-center">
-            <div className="mb-12">
-              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6 text-gray-900">
+        <section
+          className="relative flex items-center min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-90px)] pt-10 md:pt-20 pb-12"
+          id="hero"
+        >
+          {/* Subtle gradient background overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-blue-50/40" />
+          <div className="container mx-auto px-4 relative z-10 text-center flex flex-col items-center justify-center">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 text-gray-900">
                 Create stunning AI-generated{' '}
                 <span className="modelia-gradient-text">images</span> with ease
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Upload your photo, add a creative prompt, select a style, and instantly
-                generate unique AI-enhanced images.
+              <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Upload your photo, craft a creative prompt, choose a style, and generate
+                unique AI-enhanced visuals in seconds.
               </p>
             </div>
-
             {/* Feature Pills */}
-            <div className="flex flex-wrap justify-center gap-4 mb-16">
-              <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-green-200 rounded-full text-green-700 font-medium text-sm shadow-lg">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Upload & preview images with easy client-side resizing
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl">
+              <div className="flex items-center px-4 py-3 bg-white/80 backdrop-blur-sm border border-green-200 rounded-2xl text-green-700 font-medium text-sm shadow-lg">
+                <CheckCircle className="w-4 h-4 mr-2 shrink-0" />
+                <span className="text-left">
+                  Upload & preview images with client-side resizing
+                </span>
               </div>
-              <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-200 rounded-full text-blue-700 font-medium text-sm shadow-lg">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Generate images with prompt and style selection via mocked AI API
+              <div className="flex items-center px-4 py-3 bg-white/80 backdrop-blur-sm border border-blue-200 rounded-2xl text-blue-700 font-medium text-sm shadow-lg">
+                <CheckCircle className="w-4 h-4 mr-2 shrink-0" />
+                <span className="text-left">
+                  Prompt + style driven generation via mocked AI API
+                </span>
               </div>
-              <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-full text-purple-700 font-medium text-sm shadow-lg">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Manage generation history and retry on errors with abort support
+              <div className="flex items-center px-4 py-3 bg-white/80 backdrop-blur-sm border border-purple-200 rounded-2xl text-purple-700 font-medium text-sm shadow-lg sm:col-span-2 lg:col-span-1">
+                <CheckCircle className="w-4 h-4 mr-2 shrink-0" />
+                <span className="text-left">
+                  History, retries & abort for resilient workflows
+                </span>
               </div>
+            </div>
+            <div className="mt-12">
+              <a
+                href="#app-start"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-modelia-gradient text-white font-semibold shadow-lg shadow-modelia-500/20 transition hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-modelia-300"
+              >
+                Start Creating
+                <ArrowRight className="w-5 h-5" />
+              </a>
             </div>
           </div>
         </section>
 
         {/* Main App Interface */}
-        <section className="relative py-16">
+        <section className="relative py-16" id="app-start">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
               {/* Main Controls */}
