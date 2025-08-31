@@ -44,18 +44,6 @@ export const Header: React.FC = () => {
               Community
             </a>
           </nav>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-3">
-            <button className="hidden md:flex items-center px-4 py-2 text-modelia-600 border border-modelia-200 rounded-lg hover:bg-modelia-50 transition-all duration-200 font-medium">
-              <User className="w-4 h-4 mr-2" />
-              Login
-            </button>
-            <button className="modelia-button text-sm">Get free access</button>
-            <button className="md:hidden p-2 text-gray-600 hover:text-modelia-600 transition-colors duration-200">
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
         </div>
       </div>
     </header>
